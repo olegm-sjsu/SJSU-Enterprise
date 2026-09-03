@@ -1,0 +1,3 @@
+#cloud-config
+ssh_authorized_keys:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHNpENcmZ3OVtJxvAT/6x/Z67d9+yVmBDJ1IdbzHOJbE cse138

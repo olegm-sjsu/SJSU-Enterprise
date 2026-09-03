@@ -1,0 +1,108 @@
+---
+# Deploy play: installs nginx, serves "Hello World from SJSU-X" on port 8080
+- name: Deploy Hello World webserver
+  hosts: webservers
+  become: true
+  tags: deploy
+  tasks:
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: true
+
+    - name: Create web root for the SJSU site
+      file:
+        path: /var/www/sjsu
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: "0755"
+
+    - name: Deploy index.html with Hello World message
+      template:
+        src: templates/index.html.j2
+        dest: /var/www/sjsu/index.html
+        owner: www-data
+        group: www-data
+        mode: "0644"
+      notify: reload nginx
+
+    - name: Deploy nginx site config listening on port 8080
+      template:
+        src: templates/sjsu.conf.j2
+        dest: /etc/nginx/sites-available/sjsu
+        owner: root
+        group: root
+        mode: "0644"
+      notify: reload nginx
+
+    - name: Enable the SJSU site
+      file:
+        src: /etc/nginx/sites-available/sjsu
+        dest: /etc/nginx/sites-enabled/sjsu
+        state: link
+      notify: reload nginx
+
+    - name: Disable the default nginx site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: reload nginx
+
+    - name: Allow port 8080 through ufw
+      ufw:
+        rule: allow
+        port: "8080"
+        proto: tcp
+      ignore_errors: true
+
+    - name: Ensure nginx is started and enabled
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+  handlers:
+    - name: reload nginx
+      service:
+        name: nginx
+        state: reloaded
+
+# Un-deploy play: fully removes the webserver and its resources
+- name: Un-deploy Hello World webserver
+  hosts: webservers
+  become: true
+  tags: undeploy
+  tasks:
+    - name: Stop and disable nginx
+      service:
+        name: nginx
+        state: stopped
+        enabled: false
+      ignore_errors: true
+
+    - name: Remove the SJSU site symlink
+      file:
+        path: /etc/nginx/sites-enabled/sjsu
+        state: absent
+
+    - name: Remove the SJSU site config
+      file:
+        path: /etc/nginx/sites-available/sjsu
+        state: absent
+
+    - name: Remove the SJSU web root
+      file:
+        path: /var/www/sjsu
+        state: absent
+
+    - name: Remove nginx package
+      apt:
+        name: nginx
+        state: absent
+        purge: true
+
+    - name: Autoremove unused dependencies
+      apt:
+        autoremove: true
