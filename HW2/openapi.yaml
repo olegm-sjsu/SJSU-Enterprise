@@ -1,0 +1,508 @@
+openapi: 3.1.0
+info:
+  title: GitHub Issues Wrapper Service API
+  description: CMPE 272 HW2 - Contract-first REST API wrapping GitHub Issues and processing
+    Webhook events.
+  version: 1.0.0
+paths:
+  /healthz:
+    get:
+      tags:
+      - System
+      summary: Health check endpoint
+      operationId: healthz_healthz_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /issues:
+    post:
+      tags:
+      - Issues
+      summary: Create a GitHub issue
+      operationId: create_issue_issues_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssueResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - Issues
+      summary: List issues for the repository
+      operationId: list_issues_issues_get
+      parameters:
+      - name: state
+        in: query
+        required: false
+        schema:
+          type: string
+          pattern: ^(open|closed|all)$
+          description: Filter state
+          default: open
+          title: State
+        description: Filter state
+      - name: labels
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Comma-separated labels
+          title: Labels
+        description: Comma-separated labels
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          description: Page number
+          default: 1
+          title: Page
+        description: Page number
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Items per page (max 100)
+          default: 30
+          title: Per Page
+        description: Items per page (max 100)
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: ETag validation header
+          title: If-None-Match
+        description: ETag validation header
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /issues/{number}:
+    get:
+      tags:
+      - Issues
+      summary: Get a single GitHub issue
+      operationId: get_issue_issues__number__get
+      parameters:
+      - name: number
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+          description: Issue number
+          title: Number
+        description: Issue number
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssueResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    patch:
+      tags:
+      - Issues
+      summary: Update a GitHub issue
+      operationId: update_issue_issues__number__patch
+      parameters:
+      - name: number
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+          description: Issue number
+          title: Number
+        description: Issue number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssueResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /issues/{number}/comments:
+    post:
+      tags:
+      - Comments
+      summary: Add a comment to an issue
+      operationId: create_comment_issues__number__comments_post
+      parameters:
+      - name: number
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+          description: Issue number
+          title: Number
+        description: Issue number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /webhook:
+    post:
+      tags:
+      - Webhooks
+      summary: GitHub Webhook receiver endpoint
+      operationId: handle_webhook_webhook_post
+      parameters:
+      - name: X-Hub-Signature-256
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Hub-Signature-256
+      - name: X-GitHub-Event
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Github-Event
+      - name: X-GitHub-Delivery
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Github-Delivery
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events:
+    get:
+      tags:
+      - Webhooks
+      summary: List recent processed webhook delivery events
+      operationId: list_events_events_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Max delivery events to return
+          default: 50
+          title: Limit
+        description: Max delivery events to return
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventRecord'
+                title: Response List Events Events Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    CommentCreate:
+      properties:
+        body:
+          type: string
+          minLength: 1
+          title: Body
+          description: Comment text body
+      type: object
+      required:
+      - body
+      title: CommentCreate
+      description: POST /issues/{number}/comments body.
+    CommentResponse:
+      properties:
+        id:
+          type: integer
+          title: Id
+        body:
+          type: string
+          title: Body
+        user:
+          $ref: '#/components/schemas/CommentUser'
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        html_url:
+          type: string
+          title: Html Url
+      type: object
+      required:
+      - id
+      - body
+      - user
+      - created_at
+      - html_url
+      title: CommentResponse
+    CommentUser:
+      properties:
+        login:
+          type: string
+          title: Login
+        id:
+          type: integer
+          title: Id
+        avatar_url:
+          type: string
+          title: Avatar Url
+      type: object
+      required:
+      - login
+      - id
+      - avatar_url
+      title: CommentUser
+    EventRecord:
+      properties:
+        id:
+          type: integer
+          title: Id
+        delivery_id:
+          type: string
+          title: Delivery Id
+        event:
+          type: string
+          title: Event
+        action:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Action
+        issue_number:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Issue Number
+        timestamp:
+          type: string
+          format: date-time
+          title: Timestamp
+      type: object
+      required:
+      - id
+      - delivery_id
+      - event
+      - timestamp
+      title: EventRecord
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    IssueCreate:
+      properties:
+        title:
+          type: string
+          minLength: 1
+          title: Title
+          description: Issue title
+        body:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Body
+          description: Issue body/description
+        labels:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Labels
+          description: List of labels
+      type: object
+      required:
+      - title
+      title: IssueCreate
+      description: POST /issues body.
+    IssueResponse:
+      properties:
+        number:
+          type: integer
+          title: Number
+        html_url:
+          type: string
+          title: Html Url
+        state:
+          type: string
+          title: State
+        title:
+          type: string
+          title: Title
+        body:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Body
+        labels:
+          items:
+            type: string
+          type: array
+          title: Labels
+          default: []
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - number
+      - html_url
+      - state
+      - title
+      - created_at
+      - updated_at
+      title: IssueResponse
+    IssueUpdate:
+      properties:
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+          description: Updated issue title
+        body:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Body
+          description: Updated issue body
+        state:
+          anyOf:
+          - type: string
+            pattern: ^(open|closed)$
+          - type: 'null'
+          title: State
+          description: 'Target state: open or closed'
+      type: object
+      title: IssueUpdate
+      description: PATCH /issues/{number} body.
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: PAT
+      description: GitHub Fine-Grained PAT or App Installation Token
+security:
+- bearerAuth: []

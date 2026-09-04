@@ -1,0 +1,147 @@
+{
+  "info": {
+    "_postman_id": "c1f2e3d4-5678-90ab-cdef-1234567890ab",
+    "name": "HW2 GitHub Issues Service API",
+    "description": "Postman Collection for CMPE 272 HW2 - GitHub Issues REST API & Webhooks",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/healthz",
+          "host": ["{{base_url}}"],
+          "path": ["healthz"]
+        }
+      }
+    },
+    {
+      "name": "Create Issue",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Postman Test Issue\",\n  \"body\": \"Created via Postman collection\",\n  \"labels\": [\"testing\"]\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/issues",
+          "host": ["{{base_url}}"],
+          "path": ["issues"]
+        }
+      }
+    },
+    {
+      "name": "List Issues",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/issues?state=open&page=1&per_page=30",
+          "host": ["{{base_url}}"],
+          "path": ["issues"],
+          "query": [
+            { "key": "state", "value": "open" },
+            { "key": "page", "value": "1" },
+            { "key": "per_page", "value": "30" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Issue by Number",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/issues/1",
+          "host": ["{{base_url}}"],
+          "path": ["issues", "1"]
+        }
+      }
+    },
+    {
+      "name": "Update Issue",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Updated Issue Title\",\n  \"state\": \"closed\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/issues/1",
+          "host": ["{{base_url}}"],
+          "path": ["issues", "1"]
+        }
+      }
+    },
+    {
+      "name": "Add Comment to Issue",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"body\": \"Comment added via Postman collection\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/issues/1/comments",
+          "host": ["{{base_url}}"],
+          "path": ["issues", "1", "comments"]
+        }
+      }
+    },
+    {
+      "name": "Simulate Webhook Delivery",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-GitHub-Event", "value": "issues" },
+          { "key": "X-GitHub-Delivery", "value": "postman-delivery-123" },
+          { "key": "X-Hub-Signature-256", "value": "sha256=PLACEHOLDER_HMAC_SHA256" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"opened\",\n  \"issue\": {\n    \"number\": 1\n  }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/webhook",
+          "host": ["{{base_url}}"],
+          "path": ["webhook"]
+        }
+      }
+    },
+    {
+      "name": "List Webhook Events History",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/events?limit=50",
+          "host": ["{{base_url}}"],
+          "path": ["events"],
+          "query": [
+            { "key": "limit", "value": "50" }
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000"
+    }
+  ]
+}

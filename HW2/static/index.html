@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Issues</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-title">
+      <span>Issues</span>
+    </div>
+    <div class="topbar-status">
+      <span id="repo-name" class="repo-name">—</span>
+      <span id="connection-pill" class="pill pill-unknown">
+        <span class="dot"></span>
+        <span id="connection-label">Checking…</span>
+      </span>
+    </div>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <div class="tabs" id="tabs">
+        <button class="tab" data-state="all">All</button>
+        <button class="tab" data-state="open">Open</button>
+        <button class="tab" data-state="closed">Closed</button>
+      </div>
+      <button class="btn btn-primary" id="new-issue-btn">New issue</button>
+    </div>
+
+    <section class="panel" id="new-issue-panel" hidden>
+      <form id="new-issue-form">
+        <div class="field">
+          <label for="issue-title">Title</label>
+          <input type="text" id="issue-title" name="title" required maxlength="256" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="issue-body">Description</label>
+          <textarea id="issue-body" name="body" rows="4"></textarea>
+        </div>
+        <div class="field">
+          <label for="issue-labels">Labels</label>
+          <input type="text" id="issue-labels" name="labels" placeholder="bug, help wanted" autocomplete="off">
+        </div>
+        <div class="form-error" id="form-error" hidden></div>
+        <div class="form-actions">
+          <button type="button" class="btn" id="cancel-issue-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="submit-issue-btn">Submit new issue</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="list-container">
+      <div id="list-error" class="banner banner-error" hidden>
+        <span id="list-error-message"></span>
+        <button class="btn" id="retry-btn">Retry</button>
+      </div>
+      <ul class="issue-list" id="issue-list"></ul>
+      <div class="empty-state" id="empty-state" hidden>
+        <p>No issues here.</p>
+        <button class="btn btn-primary" id="empty-new-issue-btn">New issue</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

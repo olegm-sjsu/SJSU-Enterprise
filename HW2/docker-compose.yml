@@ -1,0 +1,22 @@
+# Author: Oleg Mrynskyi
+
+version: '3.8'
+
+services:
+  issues-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hw2-issues-service
+    ports:
+      - "${PORT:-8000}:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
